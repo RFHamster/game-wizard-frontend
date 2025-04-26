@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { agentService } from '../services/api';
 import { Agent } from '../types/Agent';
+import { useAgents } from '../hooks/useAgents';
 
 export default function AgentChat() {
   const { agentName } = useParams();
@@ -12,6 +13,7 @@ export default function AgentChat() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<{sender: string, text: string}[]>([]);
+  const { getAgentResponse } = useAgents();
 
   useEffect(() => {
     async function fetchAgent() {
@@ -33,22 +35,24 @@ export default function AgentChat() {
     fetchAgent();
   }, [agentName]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
+    if (!agentName) return;
 
     // Adicionar mensagem do usuário ao histórico
     setChatHistory([...chatHistory, { sender: 'user', text: message }]);
 
-    // Simular resposta do agente (em um app real, você faria uma chamada de API aqui)
+    // chamada API
+    var agentResponse = await getAgentResponse(agentName, message)
+
     setTimeout(() => {
       setChatHistory(prev => [...prev, { 
         sender: 'agent', 
-        text: `Esta é uma resposta simulada do agente ${agentName} para "${message}"` 
+        text: `${agentResponse}`
       }]);
     }, 1000);
 
-    // Limpar campo de mensagem
     setMessage('');
   };
 

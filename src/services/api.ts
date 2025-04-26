@@ -1,6 +1,6 @@
 // src/services/api.ts
 import axios from 'axios';
-import { Agent } from '../types/Agent';
+import { Agent, MessageOutput } from '../types/Agent';
 
 // Crie uma instância do axios com a URL base da sua API
 const api = axios.create({
@@ -30,10 +30,26 @@ export const agentService = {
     }
   },
 
-  // Criar um novo agente
-  async createAgent(agent: Omit<Agent, 'id'>): Promise<Agent> {
+  // Conversa um agente específico
+  async chatAgentByName(agent_name: string, input: string): Promise<MessageOutput> {
     try {
-      const response = await api.post('/agent/', agent);
+      const response = await api.post(`/chat/${agent_name}`, { input });
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao buscar o agente ${name}:`, error);
+      throw error;
+    }
+  },
+
+  // Criar um novo agente
+  async createAgent(agent: FormData | Omit<Agent, 'id'>): Promise<Agent> {
+    try {
+      // Definir os headers corretos dependendo do tipo de dados
+      const headers = agent instanceof FormData 
+        ? { 'Content-Type': 'multipart/form-data' } 
+        : { 'Content-Type': 'application/json' };
+      
+      const response = await api.post('/agent/', agent, { headers });
       return response.data;
     } catch (error) {
       console.error('Erro ao criar o agente:', error);

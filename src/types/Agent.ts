@@ -13,4 +13,9 @@ export enum AgentStatus {
     status: AgentStatus;
     collection_name?: string;
   }
+
+  export interface MessageOutput {
+    message: string;
+    agent: string;
+  }
   

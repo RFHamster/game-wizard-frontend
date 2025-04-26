@@ -27,12 +27,10 @@ export function useAgents() {
     fetchAgents();
   }, [fetchAgents]);
 
-  const addAgent = useCallback(async (newAgent: Omit<Agent, 'id'>) => {
+  const addAgent = useCallback(async (newAgent: FormData | Omit<Agent, 'id'>) => {
     try {
       const createdAgent = await agentService.createAgent(newAgent);
-      
       setAgents(prev => [...prev, createdAgent]);
-      
       return createdAgent;
     } catch (err) {
       console.error('Erro ao adicionar agente:', err);
@@ -40,7 +38,21 @@ export function useAgents() {
     }
   }, []);
 
-  return { agents, loading, error, fetchAgents, addAgent };
+  const getAgentResponse = useCallback(
+    async (agentName: string, input: string) => {
+      try {
+        const response = await agentService.chatAgentByName(agentName, input);
+        return response.message;
+      } catch (err) {
+        console.error('Erro na comunicação com o agente:', err);
+        throw err;
+      }
+    },
+    []
+  );
+
+
+  return { agents, loading, error, fetchAgents, addAgent, getAgentResponse };
 }
 
 

@@ -1,4 +1,3 @@
-// src/pages/CreateAgent.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgentStatus } from '../types/Agent';
@@ -17,6 +16,9 @@ export default function CreateAgent() {
     status: AgentStatus.CREATED,
     collection_name: ''
   });
+  
+  // Referência para o arquivo
+  const [manualFile, setManualFile] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -24,6 +26,13 @@ export default function CreateAgent() {
       ...prev,
       [name]: value
     }));
+  };
+  
+  // Manipulador específico para o upload de arquivo
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setManualFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,8 +48,21 @@ export default function CreateAgent() {
       setIsSubmitting(true);
       setFormError(null);
       
-      // Usar o hook para adicionar o agente
-      await addAgent(formData);
+      // Criar FormData para enviar os dados do formulário junto com o arquivo
+      const payload = new FormData();
+      
+      // Adicionar os campos do formulário ao FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        payload.append(key, value);
+      });
+      
+      // Adicionar o arquivo ao FormData se existir
+      if (manualFile) {
+        payload.append('manual_file', manualFile);
+      }
+      
+      // Usar o hook para adicionar o agente com o FormData
+      await addAgent(payload);
       
       // Redirecionar para o dashboard após o envio bem-sucedido
       navigate('/');
@@ -116,6 +138,28 @@ export default function CreateAgent() {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24 resize-none"
             placeholder="Dicas sobre o comportamento do agente (opcional)"
           />
+        </div>
+        
+        {/* Novo campo para upload de arquivo */}
+        <div className="mb-6">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="manual_file">
+            Manual do Jogo
+          </label>
+          <div className="flex items-center">
+            <input
+              type="file"
+              id="manual_file"
+              name="manual_file"
+              onChange={handleFileChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              accept=".pdf,.doc,.docx,.txt"
+            />
+          </div>
+          {manualFile && (
+            <p className="text-sm text-gray-600 mt-1">
+              Arquivo selecionado: {manualFile.name}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center justify-between">

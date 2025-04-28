@@ -4,7 +4,7 @@ import { Agent, MessageOutput } from '../types/Agent';
 
 // Crie uma instância do axios com a URL base da sua API
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://137.131.198.220:8000',
 });
 
 export const agentService = {
